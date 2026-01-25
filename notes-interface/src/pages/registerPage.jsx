@@ -1,0 +1,91 @@
+import { Link } from "react-router-dom";
+import React from "react";
+import { useState } from "react";
+
+function RegisterPage() {
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("registration attempt", formData);
+  };
+
+  return (
+    <div className="h-screen flex justify-center items-center w-full flex-col">
+      <h1 className="text-gray-800 text-2xl font-bold">Register on NOTEBOOK</h1>
+      <p className="text-gray-400 mb-6">
+        Create your account to start taking notes
+      </p>
+      <div className="container bg-gray-800 rounded-lg shadow-lg p-8 mx-auto w-80 mt-4">
+        {error && (
+          <div className="bg-red-500 text-white p-3 rounded mb-4">{error}</div>
+        )}
+
+        <form action="" className="flex flex-col gap-4">
+          <label htmlFor="username" className="text-white">
+            Username:
+          </label>
+          <input
+            type="text"
+            name="username"
+            id="username"
+            value={formData.username}
+            onChange={handleChange}
+            className="rounded-lg w-full p-2"
+          />
+
+          <label htmlFor="email" className="text-white">
+            Email:
+          </label>
+          <input
+            type="email"
+            name="email"
+            id="email"
+            value={formData.email}
+            onChange={handleChange}
+            className="rounded-lg w-full p-2"
+          />
+
+          <label htmlFor="password" className="text-white">
+            Password:
+          </label>
+          <input
+            type="password"
+            name="password"
+            id="password"
+            value={formData.password}
+            onChange={handleChange}
+            className="rounded-lg w-full p-2"
+          />
+
+          <button
+            type="submit"
+            className="w-full bg-white text-gray-800 hover:bg-gray-200 p-2 rounded-lg"
+          >
+            Register
+          </button>
+        </form>
+
+        <p className="text-white mt-4">
+          Already have an account?{" "}
+          <Link to="/login" className="text-blue-500 hover:underline">
+            Login
+          </Link>
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export default RegisterPage;
