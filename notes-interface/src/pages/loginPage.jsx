@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import React from "react";
 import { useState } from "react";
+import { loginUser } from "../api/auth.api.js";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -17,7 +18,21 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("login attempt", formData);
+    setIsLoading(true);
+
+    try {
+      const response = await loginUser(formData);
+
+      localStorage.setItem("token", response.data.token);
+      console.log("login successful", response.data);
+      setFormData({ email: "", password: "" });
+      // TO redirect to dashboard or home page after login
+    } catch (error) {
+      console.error("login failed", error);
+      setError(error.response?.data || "login failed");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

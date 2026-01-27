@@ -1,16 +1,18 @@
 import { Link } from "react-router-dom";
 import React from "react";
 import { useState } from "react";
+import { registerUser } from "../api/auth.api.js";
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
-    username: "",
+    userName: "",
     email: "",
     password: "",
   });
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -18,6 +20,35 @@ function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+
+    try {
+      const response = await registerUser(formData);
+
+      console.log("registration successful", response.data);
+
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
+
+      setFormData({ userName: "", email: "", password: "" });
+    } catch (error) {
+      console.error("registration failed", error);
+      if (error.response?.data.message) {
+        setError(error.response.data.message);
+      } else if (error.response?.data?.error) {
+        const errors = error.response.data.errors;
+        setError(
+          errors.map((err) => `${err.field}: ${err.message}`).join(", "),
+        );
+      } else {
+        setError("Registration failed, please try again");
+      }
+    } finally {
+      setIsLoading(false);
+    }
     console.log("registration attempt", formData);
   };
 

@@ -6,6 +6,7 @@ const API = axios.create({
 
 API.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -13,10 +14,26 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const register = (userData) => API.post("/auth/register", userData);
-export const login = (credentials) => API.post("/auth/login", credentials);
+export const registerUser = async (userData) => {
+  return API.post("/auth/register", userData);
+};
 
-export const getNotes = () => API.get("/notes/getAllNotes");
-export const createNote = (noteData) => API.post("/notes/create", noteData);
+export const loginUser = async (credentials) => {
+  return API.post("/auth/login", credentials);
+};
 
-export default API;
+export const getNotes = async () => {
+  return API.get("/notes/getAllNotes");
+};
+
+export const createNote = async (noteData) => {
+  return API.post("/notes/create", noteData);
+};
+
+export const updateNote = async (id, noteData) => {
+  return API.put(`/notes/${id}`, noteData);
+};
+
+export const deleteNote = async (id) => {
+  return API.delete(`/notes/${id}`);
+};
