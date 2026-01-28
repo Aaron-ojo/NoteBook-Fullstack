@@ -63,15 +63,15 @@ function RegisterPage() {
           <div className="bg-red-500 text-white p-3 rounded mb-4">{error}</div>
         )}
 
-        <form action="" className="flex flex-col gap-4">
+        <form action="" onSubmit={handleSubmit} className="flex flex-col gap-4">
           <label htmlFor="username" className="text-white">
             Username:
           </label>
           <input
             type="text"
-            name="username"
-            id="username"
-            value={formData.username}
+            name="userName"
+            id="userName"
+            value={formData.userName}
             onChange={handleChange}
             className="rounded-lg w-full p-2 text-gray-800"
           />
