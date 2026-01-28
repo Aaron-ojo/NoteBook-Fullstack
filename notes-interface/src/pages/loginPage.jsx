@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import React from "react";
 import { useState } from "react";
-import { loginUser } from "../api/auth.api.js";
+import { loginUser } from "../services/api.js";
 
 function LoginPage() {
   const [formData, setFormData] = useState({

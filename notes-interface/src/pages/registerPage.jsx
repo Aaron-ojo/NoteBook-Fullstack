@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
 import React from "react";
 import { useState } from "react";
-import { registerUser } from "../api/auth.api.js";
+import { registerUser } from "../services/api.js";
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -73,7 +73,7 @@ function RegisterPage() {
             id="username"
             value={formData.username}
             onChange={handleChange}
-            className="rounded-lg w-full p-2"
+            className="rounded-lg w-full p-2 text-gray-800"
           />
 
           <label htmlFor="email" className="text-white">
@@ -85,7 +85,7 @@ function RegisterPage() {
             id="email"
             value={formData.email}
             onChange={handleChange}
-            className="rounded-lg w-full p-2"
+            className="rounded-lg w-full p-2 text-gray-800"
           />
 
           <label htmlFor="password" className="text-white">
@@ -97,7 +97,7 @@ function RegisterPage() {
             id="password"
             value={formData.password}
             onChange={handleChange}
-            className="rounded-lg w-full p-2"
+            className="rounded-lg w-full p-2 text-gray-800"
           />
 
           <button
