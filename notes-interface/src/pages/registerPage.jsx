@@ -35,17 +35,18 @@ function RegisterPage() {
 
       setFormData({ userName: "", email: "", password: "" });
     } catch (error) {
-      console.error("registration failed", error);
-      if (error.response?.data.message) {
-        setError(error.response.data.message);
-      } else if (error.response?.data?.error) {
-        const errors = error.response.data.errors;
-        setError(
-          errors.map((err) => `${err.field}: ${err.message}`).join(", "),
-        );
+      console.log("Error Investigation time");
+      console.log(typeof error);
+      console.log(Object.keys(error));
+
+      if (error.response) {
+        console.log(error.response.status);
+        console.log(error.response.data);
       } else {
-        setError("Registration failed, please try again");
+        console.log("no response - network error");
       }
+
+      setError(JSON.stringify(error.message.data) || error.message);
     } finally {
       setIsLoading(false);
     }
@@ -64,7 +65,7 @@ function RegisterPage() {
         )}
 
         <form action="" onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <label htmlFor="username" className="text-white">
+          <label htmlFor="userName" className="text-white">
             Username:
           </label>
           <input
