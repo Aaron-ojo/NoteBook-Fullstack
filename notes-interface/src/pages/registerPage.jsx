@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import React from "react";
 import { useState } from "react";
 import { registerUser } from "../services/api.js";
+//continuing from step 7. Updating Inputs
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -13,9 +14,23 @@ function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({
+    userName: "",
+    email: "",
+    password: "",
+  });
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+    setFieldErrors({ ...fieldErrors, [name]: value });
+
+    if (name === "email" && value && !value.includes("@")) {
+      setFieldErrors((prevErrors) => ({
+        ...prevErrors,
+        email: "Please enter a valid email address.",
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -35,23 +50,53 @@ function RegisterPage() {
 
       setFormData({ userName: "", email: "", password: "" });
     } catch (error) {
-      console.log("Error Investigation time");
-      console.log(typeof error);
-      console.log(Object.keys(error));
+      console.log("full error object for debugging ", error);
+      console.log("response data", error.response?.data);
 
-      if (error.response) {
-        console.log(error.response.status);
-        console.log(error.response.data);
-      } else {
-        console.log("no response - network error");
+      setError(JSON.stringify(error.response?.data || error.message));
+
+      if (
+        error.response?.data?.errors &&
+        Array.isArray(error.response.data.errors)
+      ) {
+        console.log("found validation errors", error.response.data.errors);
+
+        const errorMessages = error.response.data.errors
+          .map((err) => `${err.field}: ${err.message}`)
+          .join(", ");
+
+        setError(`please fix: ${errorMessages}`);
+      } else if (error.response?.data?.message) {
+        console.log("found controller error:", error.response.data.message);
+
+        setError(error.response.data.message);
       }
-
-      setError(JSON.stringify(error.message.data) || error.message);
     } finally {
       setIsLoading(false);
     }
     console.log("registration attempt", formData);
   };
+
+  const formatFieldNames = (field) => {
+    if (field === "userName") return "Username";
+    if (field === "email") return "Email";
+    if (field === "password") return "Password";
+    return field;
+  };
+
+  const errorList = error.response.data.errors
+    .map((err) => `${formatFieldNames(err.field)}:${err.message}`)
+    .join("\n");
+
+  setError(`please fix the following: \n${errorList}`);
+
+  const newFieldErrors = { userName: "", email: "", password: "" };
+  error.response.data.errors.forEach((err) => {
+    if (["userName", "email", "password"].includes(err.field)) {
+      newFieldErrors[err.field] = err.message;
+    }
+  });
+  setFieldErrors(newFieldErrors);
 
   return (
     <div className="h-screen flex justify-center items-center w-full flex-col">
@@ -60,8 +105,15 @@ function RegisterPage() {
         Create your account to start taking notes
       </p>
       <div className="container bg-gray-800 rounded-lg shadow-lg p-8 mx-auto w-80 mt-4">
-        {error && (
-          <div className="bg-red-500 text-white p-3 rounded mb-4">{error}</div>
+        {error && error.includes("\n") ? (
+          <div>
+            <p>Please fix the following:</p>
+            {error.split("\n").map((line, i) => (
+              <p key={i}>{line}</p>
+            ))}
+          </div>
+        ) : (
+          <div>{error}</div>
         )}
 
         <form action="" onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -76,6 +128,8 @@ function RegisterPage() {
             onChange={handleChange}
             className="rounded-lg w-full p-2 text-gray-800"
           />
+
+          <input type="text" />
 
           <label htmlFor="email" className="text-white">
             Email:
