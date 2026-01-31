@@ -5,11 +5,11 @@ import { registerUser } from "../services/api.js";
 //continuing from step 7. Updating Inputs
 
 function RegisterPage() {
-  const [formData, setFormData] = useState({
-    userName: "",
-    email: "",
-    password: "",
-  });
+  // const [formData, setFormData] = useState({
+  //   userName: "",
+  //   email: "",
+  //   password: "",
+  // });
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
