@@ -3,6 +3,8 @@ import LoginPage from "./pages/loginPage";
 import RegisterPage from "./pages/registerPage";
 import Layout from "./components/layout";
 import HomePage from "./pages/home";
+import Dashboard from "./pages/dashboard";
+import ProtectedRoute from "./components/protectedRoute";
 import React from "react";
 
 function App() {
@@ -33,6 +35,17 @@ function App() {
             <Layout>
               <LoginPage />
             </Layout>
+          }
+        />
+
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </ProtectedRoute>
           }
         />
       </Routes>
