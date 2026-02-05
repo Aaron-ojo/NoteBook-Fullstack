@@ -37,6 +37,15 @@ function LoginPage() {
 
       localStorage.setItem("token", response.data.token);
       console.log("login successful", response.data);
+
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      } else {
+        const userData = {
+          email: formData.email,
+        };
+        localStorage.setItem("user", JSON.stringify(userData));
+      }
       setSuccess("Login successful, Redirecting...");
       setFormData({ email: "", password: "" });
       setTimeout(() => {
@@ -103,7 +112,7 @@ function LoginPage() {
 
   return (
     <div className="flex justify-center items-center h-screen flex-col ">
-      <h1 className="text-gray-800 font-bold text-2xl">Login to NOTEBOOK</h1>
+      <h1 className="text-gray-800 font-bold text-2xl">Login to INKNOTES</h1>
       <p>Access your notes more prominently</p>
       <div className="bg-gray-800 rounded-lg shadow-lg p-8 w-80 container mx-auto mt-4">
         {error && (
@@ -113,7 +122,7 @@ function LoginPage() {
         )}
 
         <form action="" onSubmit={handleSubmit}>
-          <div>
+          <div className="mb-4">
             <label htmlFor="email" className="text-white">
               Email:
             </label>
@@ -123,14 +132,16 @@ function LoginPage() {
               id="email"
               value={formData.email}
               onChange={handleChange}
-              className={`rounded-lg w-full p-2 text-gray-800 ${fieldErrors.email} ? 'border-2 border-red-500' : "" `}
+              className={`rounded-lg w-full p-2 text-gray-800 ${
+                fieldErrors.email ? "border-2 border-red-500" : ""
+              }`}
             />
             {fieldErrors.email && (
-              <p className="text-red-400 text-sm mt:1">{fieldErrors.email}</p>
+              <p className="text-red-400 text-sm mt-1">{fieldErrors.email}</p>
             )}
           </div>
 
-          <div>
+          <div className="mb-4">
             <label htmlFor="password" className="text-white">
               Password:
             </label>
@@ -140,10 +151,12 @@ function LoginPage() {
               id="password"
               value={formData.password}
               onChange={handleChange}
-              className={`rounded-lg w-full p-2 text-gray-800 ${fieldErrors.password} ? 'border-2 border-red-500' : "" `}
+              className={`rounded-lg w-full p-2 text-gray-800 ${
+                fieldErrors.password ? "border-2 border-red-500" : ""
+              }`}
             />
             {fieldErrors.password && (
-              <p className="text-red-400 text-sm mt:1">
+              <p className="text-red-400 text-sm mt-1">
                 {fieldErrors.password}
               </p>
             )}
@@ -158,7 +171,7 @@ function LoginPage() {
           </button>
 
           <p className="text-white mt-4">
-            Don't have an account?
+            Don't have an account?{" "}
             <Link to="/register" className="text-blue-500 hover:underline">
               Sign Up
             </Link>

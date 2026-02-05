@@ -61,6 +61,10 @@ function RegisterPage() {
         localStorage.setItem("token", response.data.token);
       }
 
+      if (response.data.user) {
+        localStorage.setItem("user", JSON.stringify(response.data.user));
+      }
+
       setSuccess("Registration successful, redirecting to login...");
 
       setFormData({ userName: "", email: "", password: "" });
