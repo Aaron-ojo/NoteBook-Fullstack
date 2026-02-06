@@ -1,7 +1,7 @@
 import CreateNoteForm from "../components/CreateNoteForm";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
-import { getAllNotes } from "../services/NotesApi";
+import { getNotes, deleteNote } from "../services/api.js";
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -10,6 +10,9 @@ function Dashboard() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [notes, setNotes] = useState([]);
   const [loadingNotes, setLoadingNotes] = useState(true);
+  const [selectedNote, setSelectedNote] = useState(null);
+  const [editNote, setEditNote] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchNotes();
@@ -18,8 +21,7 @@ function Dashboard() {
   const fetchNotes = async () => {
     try {
       setLoadingNotes(true);
-      const response = await getAllNotes();
-      console.log("API Response:", response.data);
+      const response = await getNotes();
       setNotes(response.data.notes || []);
     } catch (error) {
       console.log("failed to fetch notes", error);
@@ -34,6 +36,7 @@ function Dashboard() {
       try {
         const user = JSON.parse(userData);
         setUserEmail(user.email || "");
+        setUserName(user.userName || "");
       } catch (error) {
         console.error("Error parsing user data:", error);
       }
@@ -46,9 +49,24 @@ function Dashboard() {
     navigate("/login");
   };
 
-  const openNoteDetail = (noteID) => {
-    console.log("opening not", noteID);
-    //we'll implement this later
+  const openNoteDetail = (note) => {
+    setSelectedNote(note);
+  };
+
+  const handleDeleteNote = async () => {
+    if (!window.confirm("Are you sure you want to delete this note?")) return;
+    try {
+      await deleteNote(selectedNote._id);
+      fetchNotes();
+      setSelectedNote(null);
+    } catch (error) {
+      console.log("failed to delete note", error);
+      alert("failed to delete note, please try again");
+    }
+  };
+
+  const openEditForm = (note) => {
+    setEditNote(note);
   };
 
   return (
@@ -82,17 +100,25 @@ function Dashboard() {
 
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Your Notes</h2>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="search notes"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full px-3 py-2 border rounded text-gray-800"
+              />
+            </div>
+
             <button
-              onClick={() => {
-                setShowCreateForm(true);
-              }}
+              onClick={() => setShowCreateForm(true)}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
             >
               + Create New Note
             </button>
           </div>
 
-          {/* Notes List Section */}
           <div className="mt-6">
             {loadingNotes ? (
               <p>Loading notes...</p>
@@ -102,26 +128,84 @@ function Dashboard() {
               </p>
             ) : (
               <div className="space-y-3">
-                {notes.map((note) => (
-                  <div
-                    key={note._id}
-                    className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
-                    onClick={() => openNoteDetail(note._id)} // We'll create this
-                  >
-                    <h3 className="font-medium text-gray-500">{note.title}</h3>
-                    <p className="text-sm text-gray-500 truncate">
-                      {note.content.substring(0, 100)}...
-                    </p>
-                    <p className="text-xs text-gray-400 mt-2">
-                      {new Date(note.createdAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                ))}
+                {notes
+                  .filter(
+                    (note) =>
+                      note.title
+                        .toLowerCase()
+                        .includes(searchQuery.toLocaleLowerCase()) ||
+                      note.content
+                        .toLocaleLowerCase()
+                        .includes(searchQuery.toLocaleLowerCase()),
+                  )
+                  .map((note) => (
+                    <div
+                      key={note._id}
+                      className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
+                      onClick={() => openNoteDetail(note)}
+                    >
+                      <h3 className="font-medium text-gray-500">
+                        {note.title}
+                      </h3>
+                      <p className="text-sm text-gray-500 truncate">
+                        {note.content.substring(0, 100)}...
+                      </p>
+                      <p className="text-xs text-gray-400 mt-2">
+                        {note.createdAt &&
+                          new Date(note.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                  ))}
               </div>
             )}
           </div>
 
-          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          {editNote && (
+            <CreateNoteForm
+              note={editNote}
+              isEdit={true}
+              onClose={() => setEditNote(null)}
+              onSuccess={(updatedNote) => {
+                setEditNote(null);
+                fetchNotes().then(() => {
+                  if (updatedNote) setSelectedNote(updatedNote);
+                });
+              }}
+            />
+          )}
+
+          {selectedNote && (
+            <div className="mb-6 p-6 bg-white rounded-lg shadow-md border border-gray-200 mt-6 border-l-4 border-blue-500">
+              <h3 className="text-2xl font-bold text-gray-800 mb-3">
+                {selectedNote.title}
+              </h3>
+              <p className="text-gray-700 mb-6 whitespace-pre-line">
+                {selectedNote.content}
+              </p>
+              <div className="flex flex-wrap gap-3 mt-4">
+                <button
+                  onClick={() => setSelectedNote(null)}
+                  className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition"
+                >
+                  Close
+                </button>
+                <button
+                  onClick={() => openEditForm(selectedNote)}
+                  className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleDeleteNote}
+                  className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200 mt-6">
             <h3 className="font-medium text-blue-800 mb-2">
               Account Information
             </h3>
@@ -142,7 +226,6 @@ function Dashboard() {
           <CreateNoteForm
             onClose={() => setShowCreateForm(false)}
             onSuccess={() => {
-              console.log("Note created successfully!");
               setShowCreateForm(false);
               fetchNotes();
             }}

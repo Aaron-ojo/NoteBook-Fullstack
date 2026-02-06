@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { createNote } from "../services/NotesApi.js";
+import { createNote, updateNote } from "../services/api.js";
 
-function CreateNoteForm({ onClose, onSuccess }) {
+function CreateNoteForm({ onClose, onSuccess, isEdit = false, note = null }) {
   const [formData, setFormData] = useState({
-    title: "",
-    content: "",
+    title: note?.title || "",
+    content: note?.content || "",
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -12,10 +12,7 @@ function CreateNoteForm({ onClose, onSuccess }) {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
-
-    if (error) {
-      setError("");
-    }
+    if (error) setError("");
   };
 
   const handleSubmit = async (e) => {
@@ -23,22 +20,23 @@ function CreateNoteForm({ onClose, onSuccess }) {
     setIsLoading(true);
     setError("");
     try {
-      const response = await createNote(formData);
-      console.log("note created successfully", response.data);
-      window.alert("note created successfully");
-      setFormData({ title: "", content: "" });
-      onSuccess();
-    } catch (error) {
-      console.error("failed to create note", error);
-
-      if (typeof error.response?.data === "string") {
-        setError(error.response.data);
-      }
-      if (error.response?.data?.message) {
-        setError(error.response.data.message);
+      if (isEdit) {
+        const response = await updateNote(note._id, formData);
+        window.alert("Note updated successfully");
+        onSuccess(response.data.data);
       } else {
-        setError("failed to create note, please try again");
+        const response = await createNote(formData);
+        window.alert("Note created successfully");
+        onSuccess(response.data.data);
       }
+      setFormData({ title: "", content: "" });
+    } catch (error) {
+      console.error("failed to submit note", error);
+      if (typeof error.response?.data === "string")
+        setError(error.response.data);
+      else if (error.response?.data?.message)
+        setError(error.response.data.message);
+      else setError("Failed to submit note, please try again");
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +47,7 @@ function CreateNoteForm({ onClose, onSuccess }) {
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
         <div className="p-6">
           <h2 className="text-xl text-gray-800 font-bold mb-4">
-            Create New Note
+            {isEdit ? "Edit Note" : "Create New Note"}
           </h2>
 
           {error && (
@@ -84,7 +82,7 @@ function CreateNoteForm({ onClose, onSuccess }) {
                 value={formData.content}
                 onChange={handleChange}
                 rows="4"
-                className="w-full px-3 text-gray-800 py-2 border rounded"
+                className="w-full px-3 py-2 text-gray-800 border rounded"
                 disabled={isLoading}
               />
             </div>
@@ -103,7 +101,13 @@ function CreateNoteForm({ onClose, onSuccess }) {
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 disabled={isLoading}
               >
-                {isLoading ? "Creating..." : "Create Note"}
+                {isLoading
+                  ? isEdit
+                    ? "Updating..."
+                    : "Creating..."
+                  : isEdit
+                    ? "Update Note"
+                    : "Create Note"}
               </button>
             </div>
           </form>

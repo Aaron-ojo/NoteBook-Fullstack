@@ -14,26 +14,26 @@ API.interceptors.request.use((config) => {
   return config;
 });
 
-export const registerUser = async (userData) => {
+export const registerUser = (userData) => {
   return API.post("/auth/register", userData);
 };
 
-export const loginUser = async (credentials) => {
+export const loginUser = (credentials) => {
   return API.post("/auth/login", credentials);
 };
 
-export const getNotes = async () => {
+export const getNotes = () => {
   return API.get("/notes/getAllNotes");
 };
 
-export const createNote = async (noteData) => {
+export const createNote = (noteData) => {
   return API.post("/notes/create", noteData);
 };
 
-export const updateNote = async (id, noteData) => {
+export const updateNote = (id, noteData) => {
   return API.put(`/notes/${id}`, noteData);
 };
 
-export const deleteNote = async (id) => {
+export const deleteNote = (id) => {
   return API.delete(`/notes/${id}`);
 };

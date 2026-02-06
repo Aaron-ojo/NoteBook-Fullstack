@@ -124,13 +124,13 @@ function RegisterPage() {
 
       if (error.response.data.errors.length === 1) {
         const err = error.response.data.errors[0];
-        const fieldName = formatFieldName(err.field);
+        const fieldName = formatFieldNames(err.field);
         const message = capitalizeFirst(err.message);
         setError(`${fieldName}: ${message}`);
       } else {
         const formattedErrors = error.response.data.errors
           .map((err) => {
-            const fieldName = formatFieldName(err.field);
+            const fieldName = formatFieldNames(err.field);
             const message = capitalizeFirst(err.message);
             return `${fieldName}: ${message}`;
           })
