@@ -25,6 +25,7 @@ function CreateNoteForm({ onClose, onSuccess }) {
     try {
       const response = await createNote(formData);
       console.log("note created successfully", response.data);
+      window.alert("note created successfully");
       setFormData({ title: "", content: "" });
       onSuccess();
     } catch (error) {
@@ -32,7 +33,8 @@ function CreateNoteForm({ onClose, onSuccess }) {
 
       if (typeof error.response?.data === "string") {
         setError(error.response.data);
-      } else if (error.response?.data?.message) {
+      }
+      if (error.response?.data?.message) {
         setError(error.response.data.message);
       } else {
         setError("failed to create note, please try again");

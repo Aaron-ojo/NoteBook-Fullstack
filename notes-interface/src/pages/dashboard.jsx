@@ -1,11 +1,32 @@
 import CreateNoteForm from "../components/CreateNoteForm";
 import { useNavigate } from "react-router-dom";
 import React, { useState, useEffect } from "react";
+import { getAllNotes } from "../services/NotesApi";
 
 function Dashboard() {
   const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState("");
+  const [userName, setUserName] = useState("");
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const [loadingNotes, setLoadingNotes] = useState(true);
+
+  useEffect(() => {
+    fetchNotes();
+  }, []);
+
+  const fetchNotes = async () => {
+    try {
+      setLoadingNotes(true);
+      const response = await getAllNotes();
+      console.log("API Response:", response.data);
+      setNotes(response.data.notes || []);
+    } catch (error) {
+      console.log("failed to fetch notes", error);
+    } finally {
+      setLoadingNotes(false);
+    }
+  };
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
@@ -23,6 +44,11 @@ function Dashboard() {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     navigate("/login");
+  };
+
+  const openNoteDetail = (noteID) => {
+    console.log("opening not", noteID);
+    //we'll implement this later
   };
 
   return (
@@ -50,6 +76,10 @@ function Dashboard() {
         </div>
 
         <div className="bg-white rounded-lg shadow p-6">
+          <p className="text-gray-600 mb-6">
+            You're logged in! Start creating and managing your notes.
+          </p>
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Your Notes</h2>
             <button
@@ -62,21 +92,50 @@ function Dashboard() {
             </button>
           </div>
 
+          {/* Notes List Section */}
+          <div className="mt-6">
+            {loadingNotes ? (
+              <p>Loading notes...</p>
+            ) : notes.length === 0 ? (
+              <p className="text-gray-500 text-center py-8">
+                No notes yet. Create your first note!
+              </p>
+            ) : (
+              <div className="space-y-3">
+                {notes.map((note) => (
+                  <div
+                    key={note._id}
+                    className="p-4 border rounded hover:bg-gray-50 cursor-pointer"
+                    onClick={() => openNoteDetail(note._id)} // We'll create this
+                  >
+                    <h3 className="font-medium text-gray-500">{note.title}</h3>
+                    <p className="text-sm text-gray-500 truncate">
+                      {note.content.substring(0, 100)}...
+                    </p>
+                    <p className="text-xs text-gray-400 mt-2">
+                      {new Date(note.createdAt).toLocaleDateString()}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <h3 className="font-medium text-blue-800 mb-2">
               Account Information
             </h3>
             <div className="space-y-2">
               <p className="text-gray-700">
-                <span className="font-medium">Email:</span>
+                <span className="font-medium">Email: </span>
                 {userEmail || "Not available"}
+              </p>
+              <p className="text-gray-700">
+                <span className="font-medium">Username: </span>
+                {userName || "Not available"}
               </p>
             </div>
           </div>
-
-          <p className="text-gray-600">
-            You're logged in! Start creating and managing your notes.
-          </p>
         </div>
 
         {showCreateForm && (
@@ -85,6 +144,7 @@ function Dashboard() {
             onSuccess={() => {
               console.log("Note created successfully!");
               setShowCreateForm(false);
+              fetchNotes();
             }}
           />
         )}

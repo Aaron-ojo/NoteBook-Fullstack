@@ -158,7 +158,7 @@ function RegisterPage() {
 
   return (
     <div className="h-screen flex justify-center items-center w-full flex-col">
-      <h1 className="text-gray-800 text-2xl font-bold">Register on NOTEBOOK</h1>
+      <h1 className="text-gray-800 text-2xl font-bold">Register on INKNOTES</h1>
       <p className="text-gray-400 mb-6">
         Create your account to start taking notes
       </p>
